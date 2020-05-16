@@ -4,9 +4,10 @@ services:
 
   # browse to: https://localhost:9443/ibmmq/console/
   mqserver:
-    image: ibmcom/mq:9.1.5.0-r1
+    image: nuviosoftware-mq-local
     ports:
       - "1414:1414"
+      - "9443:9443"
     container_name: mqserver
     environment:
       - LICENSE=accept
