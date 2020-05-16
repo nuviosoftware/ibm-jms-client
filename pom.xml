@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.nuviosoftware</groupId>
 	<artifactId>ibm-jms-client</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>ibm-jms-client</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -25,9 +25,14 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>com.ibm.mq</groupId>
-			<artifactId>com.ibm.mq.allclient</artifactId>
-			<version>9.1.5.0</version>
+			<artifactId>mq-jms-spring-boot-starter</artifactId>
+			<version>2.0.9</version>
 		</dependency>
 
 		<dependency>
