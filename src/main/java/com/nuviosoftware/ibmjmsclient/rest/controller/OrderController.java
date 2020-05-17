@@ -2,7 +2,6 @@ package com.nuviosoftware.ibmjmsclient.rest.controller;
 
 import com.ibm.mq.jms.MQQueue;
 import com.nuviosoftware.ibmjmsclient.rest.model.OrderRequest;
-import com.nuviosoftware.ibmjmsclient.rest.model.OrderResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,26 +21,41 @@ public class OrderController {
     private JmsTemplate jmsTemplate;
 
     @PostMapping
-    public ResponseEntity<String> createOrder(@RequestBody OrderRequest order,
-                                              @RequestHeader(name = "X-Correlation-ID") String correlationId) throws JMSException {
+    public ResponseEntity<String> createOrder(@RequestBody OrderRequest order) throws JMSException {
         log.info("Sending order message '{}' to the queue", order.getMessage());
 
-        // request
         MQQueue orderRequestQueue = new MQQueue("ORDER.REQUEST");
         jmsTemplate.convertAndSend(orderRequestQueue, order.getMessage(), textMessage -> {
-            textMessage.setJMSCorrelationID(correlationId);
+            textMessage.setJMSCorrelationID(order.getIdentifier());
             return textMessage;
         });
 
-        return new ResponseEntity(correlationId, HttpStatus.ACCEPTED);
+        return new ResponseEntity(order, HttpStatus.ACCEPTED);
     }
 
 
     @GetMapping
-    public ResponseEntity<OrderResponse> receiveOrder(@RequestParam String correlationId) throws JMSException {
-        final String selectorExpression = String.format("JMSCorrelationID='ID:%s'", correlationId);
-        final TextMessage responseMessage = (TextMessage) jmsTemplate.receiveSelected("ORDER.RESPONSE", selectorExpression);
-        return new ResponseEntity(OrderResponse.builder().response(responseMessage.getText()).build(), HttpStatus.OK);
+    public ResponseEntity<OrderRequest> findOrder(@RequestParam String correlationId) throws JMSException {
+        log.info("Looking for message '{}'", correlationId);
+        String convertedId = convertCorrelationId(correlationId.getBytes());
+        final String selectorExpression = String.format("JMSCorrelationID='ID:%s'", convertedId);
+        final TextMessage responseMessage = (TextMessage) jmsTemplate.receiveSelected("ORDER.REQUEST", selectorExpression);
+        OrderRequest response = OrderRequest.builder()
+                .message(responseMessage.getText())
+                .identifier(correlationId)
+                .build();
+        return new ResponseEntity(response, HttpStatus.OK);
     }
 
+
+    public String convertCorrelationId(byte[] bytes) {
+        char[] hexArray = "0123456789ABCDEF".toCharArray();
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
 }
