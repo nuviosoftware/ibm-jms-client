@@ -6,10 +6,10 @@ import org.springframework.jms.annotation.EnableJms;
 
 @SpringBootApplication
 @EnableJms
-public class IbmJmsClientApplication {
+public class Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(IbmJmsClientApplication.class, args);
+		SpringApplication.run(Application.class, args);
 	}
 
 }
