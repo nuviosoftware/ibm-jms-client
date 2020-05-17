@@ -22,13 +22,13 @@ public class OrderController {
     private JmsTemplate jmsTemplate;
 
     @PostMapping
-    public ResponseEntity<String> createOrder(@RequestBody OrderRequest message,
+    public ResponseEntity<String> createOrder(@RequestBody OrderRequest order,
                                               @RequestHeader(name = "X-Correlation-ID") String correlationId) throws JMSException {
-        log.info("Sending order message '{}' to the queue", message.getMessage());
+        log.info("Sending order message '{}' to the queue", order.getMessage());
 
         // request
         MQQueue orderRequestQueue = new MQQueue("ORDER.REQUEST");
-        jmsTemplate.convertAndSend(orderRequestQueue, message.getMessage(), textMessage -> {
+        jmsTemplate.convertAndSend(orderRequestQueue, order.getMessage(), textMessage -> {
             textMessage.setJMSCorrelationID(correlationId);
             return textMessage;
         });
