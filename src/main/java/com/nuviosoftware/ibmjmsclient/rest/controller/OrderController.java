@@ -1,8 +1,8 @@
 package com.nuviosoftware.ibmjmsclient.rest.controller;
 
 import com.ibm.mq.jms.MQQueue;
-import com.nuviosoftware.ibmjmsclient.rest.model.MessageRequest;
-import com.nuviosoftware.ibmjmsclient.rest.model.MessageResponse;
+import com.nuviosoftware.ibmjmsclient.rest.model.OrderRequest;
+import com.nuviosoftware.ibmjmsclient.rest.model.OrderResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,21 +14,21 @@ import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
 @Slf4j
-@RequestMapping("jms")
+@RequestMapping("orders")
 @RestController
-public class JmsController {
+public class OrderController {
 
     @Autowired
     private JmsTemplate jmsTemplate;
 
-    @PostMapping("/send-message")
-    public ResponseEntity<String> sendMessage(@RequestBody MessageRequest message,
+    @PostMapping
+    public ResponseEntity<String> createOrder(@RequestBody OrderRequest message,
                                               @RequestHeader(name = "X-Correlation-ID") String correlationId) throws JMSException {
-        log.info("Sending message '{}' to the queue", message.getMessage());
+        log.info("Sending order message '{}' to the queue", message.getMessage());
 
         // request
-        MQQueue requestQueue = new MQQueue("ORDER.REQUEST");
-        jmsTemplate.convertAndSend(requestQueue, message.getMessage(), textMessage -> {
+        MQQueue orderRequestQueue = new MQQueue("ORDER.REQUEST");
+        jmsTemplate.convertAndSend(orderRequestQueue, message.getMessage(), textMessage -> {
             textMessage.setJMSCorrelationID(correlationId);
             return textMessage;
         });
@@ -37,11 +37,11 @@ public class JmsController {
     }
 
 
-    @GetMapping("/receive-message")
-    public ResponseEntity<MessageResponse> receiveMessage(@RequestParam String correlationId) throws JMSException {
+    @GetMapping
+    public ResponseEntity<OrderResponse> receiveOrder(@RequestParam String correlationId) throws JMSException {
         final String selectorExpression = String.format("JMSCorrelationID='ID:%s'", correlationId);
         final TextMessage responseMessage = (TextMessage) jmsTemplate.receiveSelected("ORDER.RESPONSE", selectorExpression);
-        return new ResponseEntity(MessageResponse.builder().response(responseMessage.getText()).build(), HttpStatus.OK);
+        return new ResponseEntity(OrderResponse.builder().response(responseMessage.getText()).build(), HttpStatus.OK);
     }
 
 }

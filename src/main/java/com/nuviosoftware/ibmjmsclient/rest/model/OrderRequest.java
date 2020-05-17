@@ -3,6 +3,6 @@ package com.nuviosoftware.ibmjmsclient.rest.model;
 import lombok.Data;
 
 @Data
-public class MessageRequest {
+public class OrderRequest {
     private String message;
 }

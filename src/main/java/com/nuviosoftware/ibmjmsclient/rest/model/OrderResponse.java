@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Builder
 @Data
-public class MessageResponse {
+public class OrderResponse {
     private String response;
 }
