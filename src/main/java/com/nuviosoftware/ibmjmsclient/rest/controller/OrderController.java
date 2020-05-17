@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @RequestMapping("orders")
@@ -37,7 +38,7 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<OrderRequest> findOrder(@RequestParam String correlationId) throws JMSException {
         log.info("Looking for message '{}'", correlationId);
-        String convertedId = convertCorrelationId(correlationId.getBytes());
+        String convertedId = bytesToHex(correlationId.getBytes());
         final String selectorExpression = String.format("JMSCorrelationID='ID:%s'", convertedId);
         final TextMessage responseMessage = (TextMessage) jmsTemplate.receiveSelected("ORDER.REQUEST", selectorExpression);
         OrderRequest response = OrderRequest.builder()
@@ -47,15 +48,15 @@ public class OrderController {
         return new ResponseEntity(response, HttpStatus.OK);
     }
 
-
-    public String convertCorrelationId(byte[] bytes) {
-        char[] hexArray = "0123456789ABCDEF".toCharArray();
-        char[] hexChars = new char[bytes.length * 2];
+    // You could use Apache Commons Codec library instead
+    private static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes();
+    public static String bytesToHex(byte[] bytes) {
+        byte[] hexChars = new byte[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
             int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
-        return new String(hexChars);
+        return new String(hexChars, StandardCharsets.UTF_8);
     }
 }
