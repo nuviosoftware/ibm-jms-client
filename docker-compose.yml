@@ -2,6 +2,17 @@ version: '2.2'
 
 services:
 
+  order-service:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      - IBM_MQ_CONN_NAME=mqserver(1414)
+    depends_on:
+      - "mqserver"
+
   # browse to: https://localhost:9443/ibmmq/console/
   mqserver:
     image: nuviosoftware-mq-local
@@ -15,3 +26,12 @@ services:
     stdin_open: true
     tty: true
     restart: always
+
+  payment-service:
+    image: payment-service-local
+    ports:
+      - 9090:9090
+    environment:
+      - IBM_MQ_CONN_NAME=mqserver(1414)
+    depends_on:
+      - "mqserver"

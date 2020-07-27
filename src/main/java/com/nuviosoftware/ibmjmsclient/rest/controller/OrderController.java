@@ -26,6 +26,7 @@ public class OrderController {
         log.info("Sending order message '{}' to the queue", order.getMessage());
 
         MQQueue orderRequestQueue = new MQQueue("ORDER.REQUEST");
+
         jmsTemplate.convertAndSend(orderRequestQueue, order.getMessage(), textMessage -> {
             textMessage.setJMSCorrelationID(order.getIdentifier());
             return textMessage;
@@ -36,11 +37,11 @@ public class OrderController {
 
 
     @GetMapping
-    public ResponseEntity<OrderRequest> findOrder(@RequestParam String correlationId) throws JMSException {
+    public ResponseEntity<OrderRequest> findOrderResponse(@RequestParam String correlationId) throws JMSException {
         log.info("Looking for message '{}'", correlationId);
         String convertedId = bytesToHex(correlationId.getBytes());
         final String selectorExpression = String.format("JMSCorrelationID='ID:%s'", convertedId);
-        final TextMessage responseMessage = (TextMessage) jmsTemplate.receiveSelected("ORDER.REQUEST", selectorExpression);
+        final TextMessage responseMessage = (TextMessage) jmsTemplate.receiveSelected("ORDER.RESPONSE", selectorExpression);
         OrderRequest response = OrderRequest.builder()
                 .message(responseMessage.getText())
                 .identifier(correlationId)
