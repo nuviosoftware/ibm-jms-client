@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.nuviosoftware</groupId>
-	<artifactId>ibm-jms-client</artifactId>
+	<artifactId>order-service</artifactId>
 	<version>1.0.0</version>
-	<name>ibm-jms-client</name>
+	<name>order-service</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>

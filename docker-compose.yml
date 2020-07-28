@@ -15,7 +15,7 @@ services:
 
   # browse to: https://localhost:9443/ibmmq/console/
   mqserver:
-    image: nuviosoftware-mq-local
+    image: nuviosoftware-mq-local # you have to build this image separately, see: https://github.com/nuviosoftware/custom-ibm-mq
     ports:
       - "1414:1414"
       - "9443:9443"
@@ -28,7 +28,7 @@ services:
     restart: always
 
   payment-service:
-    image: payment-service-local
+    image: payment-service-local # you have to build this image separately, see: https://github.com/nuviosoftware/ibm-jms-client2
     ports:
       - 9090:9090
     environment:

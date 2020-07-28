@@ -1,7 +1,7 @@
-package com.nuviosoftware.ibmjmsclient.rest.controller;
+package com.nuviosoftware.ibmjmsclient.rest;
 
 import com.ibm.mq.jms.MQQueue;
-import com.nuviosoftware.ibmjmsclient.rest.model.OrderRequest;
+import com.nuviosoftware.ibmjmsclient.model.OrderRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<String> createOrder(@RequestBody OrderRequest order) throws JMSException {
-        log.info("Sending order message '{}' to the queue", order.getMessage());
+        log.info("### 1 ### Order Service sending order message '{}' to the queue", order.getMessage());
 
         MQQueue orderRequestQueue = new MQQueue("ORDER.REQUEST");
 
@@ -36,12 +36,13 @@ public class OrderController {
     }
 
 
+    @Deprecated // this was just to show how to find a message by correlation Id
     @GetMapping
-    public ResponseEntity<OrderRequest> findOrderResponse(@RequestParam String correlationId) throws JMSException {
+    public ResponseEntity<OrderRequest> findOrderByCorrelationId(@RequestParam String correlationId) throws JMSException {
         log.info("Looking for message '{}'", correlationId);
         String convertedId = bytesToHex(correlationId.getBytes());
         final String selectorExpression = String.format("JMSCorrelationID='ID:%s'", convertedId);
-        final TextMessage responseMessage = (TextMessage) jmsTemplate.receiveSelected("ORDER.RESPONSE", selectorExpression);
+        final TextMessage responseMessage = (TextMessage) jmsTemplate.receiveSelected("ORDER.REQUEST", selectorExpression);
         OrderRequest response = OrderRequest.builder()
                 .message(responseMessage.getText())
                 .identifier(correlationId)

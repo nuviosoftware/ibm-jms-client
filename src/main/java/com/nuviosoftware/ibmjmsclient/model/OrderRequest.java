@@ -1,4 +1,4 @@
-package com.nuviosoftware.ibmjmsclient.rest.model;
+package com.nuviosoftware.ibmjmsclient.model;
 
 import lombok.Builder;
 import lombok.Data;
