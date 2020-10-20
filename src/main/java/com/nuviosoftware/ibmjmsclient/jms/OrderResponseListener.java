@@ -12,12 +12,17 @@ import javax.jms.TextMessage;
 @Component
 public class OrderResponseListener {
 
-    @JmsListener(destination = "ORDER.RESPONSE")
-    public void receive(Message message) throws JMSException {
+    @JmsListener(destination = "orders/requests")
+    public void receive1(Message message) throws JMSException {
         TextMessage textMessage = (TextMessage) message;
-        log.info("### 4 ### Order Service received message response : {} with correlation id: {}",
+        log.info("### 4a ### Order Service received message response : {} with correlation id: {}",
                 textMessage.getText(), textMessage.getJMSCorrelationID());
+    }
 
-        // do some business logic here, like updating the order in the database
+    @JmsListener(destination = "orders/requests")
+    public void receive2(Message message) throws JMSException {
+        TextMessage textMessage = (TextMessage) message;
+        log.info("### 4b ### Order Service received message response : {} with correlation id: {}",
+                textMessage.getText(), textMessage.getJMSCorrelationID());
     }
 }
