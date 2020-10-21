@@ -24,7 +24,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<String> createOrder(@RequestBody OrderRequest order) throws JMSException {
-        log.info("### 1 ### Order Service sending order message '{}' to the queue", order.getMessage());
+        log.info("### 1 ### Order Service sending order message '{}' to the queue", order.toString());
 
         MQQueue orderRequestQueue = new MQQueue("ORDER.REQUEST");
 

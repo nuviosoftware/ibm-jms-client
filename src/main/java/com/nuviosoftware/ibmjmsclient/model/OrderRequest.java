@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Builder
 @Data
 public class OrderRequest implements Serializable {
-    private String message;
+    private String name;
     private String identifier;
-    private Long someNumber;
+    private Long quantity;
 }
